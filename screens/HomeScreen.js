@@ -1,29 +1,39 @@
 import React from 'react';
 import {
-  Image,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Image,
+    AlertIOS,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { WebBrowser } from 'expo';
-
+import fakeEnv from '../fakeEnv';
 import { MonoText } from '../components/StyledText';
 
 export default class HomeScreen extends React.Component {
-  static navigationOptions = {
-    header: null,
-  };
+    static navigationOptions = {
+        header: null,
+    };
     state = {
-        backgroundUrl: ''
+        backgroundUrl: '',
+        location: {
+            lat: '',
+            lng: ''
+        },
+        tempData: {
+            realFeel: '',
+            temp: '',
+            tempSummary: '',
+            precipProbability: ''
+        }
     }
     componentDidMount() {
+        
         // fetch('https://api.unsplash.com/photos/random', {
         //     method: 'GET',
         //     headers: {
-        //         Authorization: 'Client-ID 19526e60e3bb5510a26e80513d4486f9d2d9041827949985cedce4aea73b4521'
+        //         Authorization: `Client-ID ${fakeEnv.DARKSKY_API}`
         //     },
         // })
         //     .then(response => response.json())
@@ -40,43 +50,110 @@ export default class HomeScreen extends React.Component {
         //     })
     }
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <Image
-            source={{ uri: this.state.backgroundUrl || 'https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=668&q=80' }}
-            style={{ flex: 1 }} />
-        <View style={styles.startButtonContainer}>
-        <TouchableOpacity onPress={this._handleStartPress}>
-            <Text style={styles.startText}>Help, it didn’t automatically reload!</Text>
-        </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
+    render() {
+        return (
+            <View style={styles.container}>
+                <View style={styles.startButtonContainer}>
+                    <TouchableOpacity onPress={this._handleStartPress}>
+                        <Text style={styles.startText}>Get Weather</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.startButtonContainer}>
+                    <Text>{this.state.location.lat}</Text>
+                </View>
+                <Image
+                    source={{ uri: this.state.backgroundUrl || 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1001&q=80' }}
+                    style={styles.backgroundImage} />
+            </View>
+        );
+    }
 
-  _handleStartPress = () => {
-    WebBrowser.openBrowserAsync(
-      'https://docs.expo.io/versions/latest/guides/up-and-running.html#can-t-see-your-changes'
-    );
-  };
+    _handleStartPress = () => {
+        // AlertIOS.alert('Sync Complete', 'All your data are belong to us.');
+        navigator.geolocation.getCurrentPosition((pos) => {
+            this.setState({
+                location: {
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude
+                }
+            })
+            this.getCurrentWeather();
+        })
+    };
+
+    getCurrentWeather = () => {
+        console.log('in getCurrentWeather');
+        console.log(this.state.location);
+        fetch(`https://api.darksky.net/forecast/${fakeEnv.DARKSKY_API}/${this.state.location.lat},${this.state.location.lng}?units=auto`)
+            .then(response => response.json())
+            .then(res => {
+                this.setState({
+                    tempData: {
+                        realFeel: res.currently.apparentTemperature,
+                        temp: res.currently.temperature,
+                        tempSummary: res.currently.icon,
+                        precipProbability: res.currently.precipProbability
+                    }
+                })
+                console.log(this.state);
+            })
+            .catch(err => {
+                console.log('error in darksky api call', err);
+            })
+
+    }
 }
 
+// "currently": Object {
+// [02:44:03]     "apparentTemperature": -23.91,
+// [02:44:03]     "cloudCover": 0,
+// [02:44:03]     "dewPoint": -18.85,
+// [02:44:03]     "humidity": 0.79,
+// [02:44:03]     "icon": "clear-night",
+// [02:44:03]     "nearestStormBearing": 221,
+// [02:44:03]     "nearestStormDistance": 153,
+// [02:44:03]     "ozone": 366.72,
+// [02:44:03]     "precipIntensity": 0,
+// [02:44:03]     "precipProbability": 0,
+// [02:44:03]     "pressure": 1024.2,
+// [02:44:03]     "summary": "Clear",
+// [02:44:03]     "temperature": -14.38,
+// [02:44:03]     "time": 1548578643,
+// [02:44:03]     "uvIndex": 0,
+// [02:44:03]     "visibility": 10,
+// [02:44:03]     "windBearing": 325,
+// [02:44:03]     "windGust": 5.84,
+// [02:44:03]     "windSpeed": 3.3,
+// [02:44:03]   },
+
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'stretch',
-    justifyContent: 'center',
-  },
-  startButtonContainer: {
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'red'
-  },
-  startText: {
-    fontSize: 14,
-    color: '#fff',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        justifyContent: 'center',
+    },
+    backgroundImage: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        
+
+    },
+    startButtonContainer: {
+        zIndex: 10,
+        justifyContent: 'center',
+        alignItems: 'center'
+
+    },
+    startText: {
+        padding: 20,
+        fontSize: 25,
+        color: '#fff',
+        borderWidth: 2,
+        borderColor: '#fff',
+        borderRadius: 15
+    },
 });
