@@ -43,11 +43,40 @@ export default class HomeScreen extends React.Component {
                         :
                         <ActivityIndicator size="large" color="#83d8fc" />
                     }
-                    
                 </View>
                 <Image
                     source={{ uri: this.state.backgroundUrl || 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1001&q=80' }}
                     style={styles.backgroundImage} />
+                {this.state.tempData.realFeel ?
+                <View style={styles.weatherCard}>
+                    <View style={styles.weatherCardTemps}>
+                        <View style={styles.tempGroup}>
+                            <Text style={styles.weatherCardText}>
+                                {Math.round(this.state.tempData.realFeel)}
+                                &deg; F
+                            </Text>
+                            <Text style={styles.textSubHeading}>Feels Like</Text>
+                        </View>
+                        <View style={styles.tempGroup}>
+                            <Text style={styles.weatherCardText}>
+                                {Math.round(this.state.tempData.precipProbability)}
+                                %
+                            </Text>
+                                <Text style={styles.textSubHeading}>Precip Chance</Text>
+                        </View>
+                    </View>
+                    <View style={styles.tempSummary}>
+                        <Text style={styles.weatherCardSummaryText}>
+                            {this.state.tempData.tempSummary}
+                        </Text>
+                    </View>
+                </View>
+                :
+                <View></View>
+                }
+                <View style={styles.aboutCard}>
+                    <Text style={{ color: '#9e9e9e', textAlign: 'center'}}>Weather data provided by DarkSky API & images supplied by Unsplash API</Text>
+                </View>
             </View>
         );
     }
@@ -74,11 +103,46 @@ export default class HomeScreen extends React.Component {
                 return response.json()
             })
             .then(res => {
+                let tempSummary;
+                switch (res.currently.icon) {
+                    case 'clear-day':
+                        tempSummary = 'Clear Day :)'
+                        break;
+                    case 'clear-night':
+                        tempSummary = 'Clear Evening :)'
+                        break;
+                    case 'rain':
+                        tempSummary = 'rain'
+                        break;
+                    case 'snow':
+                        tempSummary = 'snowing'
+                        break;
+                    case 'sleet':
+                        tempSummary = 'sleet'
+                        break;
+                    case 'wind':
+                        tempSummary = 'wind'
+                        break;
+                    case 'fog':
+                        tempSummary = 'fog'
+                        break;
+                    case 'cloudy':
+                        tempSummary = 'cloudy'
+                        break;
+                    case 'partly-cloudy-day':
+                        tempSummary = 'partly Cloudy'
+                        break;
+                    case 'partly-cloudy-night':
+                        tempSummary = 'partly Cloudy Evening'
+                        break;
+                    default:
+                        tempSummary = 'A lovely Day'
+                }
                 this.setState({
                     tempData: {
                         realFeel: res.currently.apparentTemperature,
                         temp: res.currently.temperature,
-                        tempSummary: res.currently.icon,
+                        tempSummary: tempSummary,
                         precipProbability: res.currently.precipProbability
                     }
                 })
@@ -91,6 +155,7 @@ export default class HomeScreen extends React.Component {
     }
 
     getWeatherImage = () => {
+
         console.log('this is summary of current temp', this.state.tempData.tempSummary);
         fetch(`http://192.168.1.5:5000/api/weather-image?summary=${this.state.tempData.tempSummary}`)
             .then(response => response.json())
@@ -119,8 +184,6 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        
-
     },
     startButtonContainer: {
         zIndex: 10,
@@ -128,16 +191,60 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     startButton: {
-        backgroundColor: 'rgba(0,0,0, 0.3)',
+        backgroundColor: 'rgba(3,169,244, 0.25)',
         borderRadius: 15,
     },
     startText: {
         padding: 20,
         fontSize: 25,
         color: '#fff',
-        borderWidth: 2,
+        borderWidth: 1.5,
         borderColor: '#fff',
+
         borderRadius: 15,
-        
+    },
+    weatherCard: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        marginTop: 25,
+        padding: 10,
+        backgroundColor: 'rgba(0,0,0,0.15)',
+    },
+    weatherCardTemps: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    weatherCardText: {
+        fontSize: 35,
+        color: '#fff',
+    },
+    tempGroup: {
+        alignItems: 'center',
+        borderRadius: 5,
+        padding: 10,
+    },
+    textSubHeading: {
+        color: '#fff'
+    },
+    tempSummary: {
+        alignItems: 'center',
+        marginTop: 15
+    },
+    weatherCardSummaryText: {
+        fontSize: 20,
+        color: '#fff',
+        borderRadius: 5,
+    },
+    aboutCard: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: 10,
+        backgroundColor: 'rgba(0,0,0,0.15)',
+        alignItems: 'center',
+        color: '#e0e0e0'
     },
 });
