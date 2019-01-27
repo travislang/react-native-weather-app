@@ -84,18 +84,20 @@ export default class HomeScreen extends React.Component {
     getCurrentWeather = () => {
         console.log('in getCurrentWeather');
         console.log(this.state.location);
-        fetch(`https://api.darksky.net/forecast/${devEnv.DARKSKY_API}/${this.state.location.lat},${this.state.location.lng}?units=auto`)
-            .then(response => response.json())
+        fetch(`http://192.168.1.5:5000/api/weather/${this.state.location.lat}/${this.state.location.lng}`)
+            .then(response => {
+                return response.json()
+            })
             .then(res => {
-                this.setState({
-                    tempData: {
-                        realFeel: res.currently.apparentTemperature,
-                        temp: res.currently.temperature,
-                        tempSummary: res.currently.icon,
-                        precipProbability: res.currently.precipProbability
-                    }
-                })
-                console.log(this.state);
+                // this.setState({
+                //     tempData: {
+                //         realFeel: res.currently.apparentTemperature,
+                //         temp: res.currently.temperature,
+                //         tempSummary: res.currently.icon,
+                //         precipProbability: res.currently.precipProbability
+                //     }
+                // })
+                console.log(res);
             })
             .catch(err => {
                 console.log('error in darksky api call', err);
