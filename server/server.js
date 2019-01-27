@@ -13,7 +13,6 @@ const PORT = process.env.PORT || 5000;
 app.get('/api/weather-image', (req, res) => {
     const queryParam = req.query.summary;
     console.log('query', queryParam);
-    
     axios.get(`https://api.unsplash.com/photos/random?client_id=${process.env.UNSPLASH_API}&query=${queryParam}&orientation=portrait`)
         .then( response => {
             res.send(response.data)
