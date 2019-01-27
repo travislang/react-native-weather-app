@@ -8,7 +8,7 @@ import {
     View,
 } from 'react-native';
 import { WebBrowser } from 'expo';
-import fakeEnv from '../fakeEnv';
+import devEnv from '../devEnv';
 import { MonoText } from '../components/StyledText';
 
 export default class HomeScreen extends React.Component {
@@ -33,7 +33,7 @@ export default class HomeScreen extends React.Component {
         // fetch('https://api.unsplash.com/photos/random', {
         //     method: 'GET',
         //     headers: {
-        //         Authorization: `Client-ID ${fakeEnv.DARKSKY_API}`
+        //         Authorization: `Client-ID ${devEnv.DARKSKY_API}`
         //     },
         // })
         //     .then(response => response.json())
@@ -84,7 +84,7 @@ export default class HomeScreen extends React.Component {
     getCurrentWeather = () => {
         console.log('in getCurrentWeather');
         console.log(this.state.location);
-        fetch(`https://api.darksky.net/forecast/${fakeEnv.DARKSKY_API}/${this.state.location.lat},${this.state.location.lng}?units=auto`)
+        fetch(`https://api.darksky.net/forecast/${devEnv.DARKSKY_API}/${this.state.location.lat},${this.state.location.lng}?units=auto`)
             .then(response => response.json())
             .then(res => {
                 this.setState({
